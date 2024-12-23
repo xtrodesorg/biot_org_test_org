@@ -1,0 +1,24 @@
+name: Revert biot organization to release 
+permissions:
+  id-token: write
+  contents: write
+on: 
+  release:
+    types: [published]
+jobs:
+
+  define-action-dest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: create-env-workflow-dest
+        run: echo "WORKFLOW_DEST=${{github.event.release.target_commitish}}" >> $GITHUB_ENV
+  call-deploy-plugin-CI:  
+    name: call-workflow
+    uses: xtrodesorg/biot_org_manager/tree/main/.github/workflows/PushRelease2Biot.yml@main
+    with:
+      release-tag: ${{github.event.release.tag_name}}
+      env: ${{github.event.release.target_commitish}} #BRANCH_NAME  #"development"
+    permissions:
+      id-token: write
+      contents: write
+    secrets: inherit
