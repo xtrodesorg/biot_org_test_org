@@ -1,0 +1,48 @@
+on: 
+  workflow_call:
+    inputs:
+      ENV:
+        description: "environment to be deplyed in: development/production."
+        required: true
+        type: string
+      release-tag:
+        description: "the realese tag used to trigger the workflow."
+        required: true
+        type: string
+
+env:
+    DEV_BIOT_PASSWORD: ${{ secrets.DEV_BIOT_PASSWORD }}
+    PROD_BIOT_PASSWORD: ${{ secrets.PROD_BIOT_PASSWORD }}
+    DEV_BIOT_USER: ${{ vars.DEV_BIOT_USER }}
+    PROD_BIOT_USER: ${{ vars.PROD_BIOT_USER }}
+    ENV: ${{ inputs.ENV }}
+    RELEASE_TAG: ${{ inputs.RELEASE_TAG }}
+    USER_AGENT: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+    GITHB_TOKEN: ${{ secrets.GITHB_TOKEN }}
+
+
+jobs:
+  Pack-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ inputs.ENV }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12' # Specify the Python version you need
+
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt # If you have a requirements file
+   
+    - name: Run Python script
+    
+      run:  |
+        python revert_to_release.py
